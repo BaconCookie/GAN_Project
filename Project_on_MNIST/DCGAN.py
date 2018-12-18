@@ -18,7 +18,7 @@ import numpy as np
 #                                                                                       #
 # Code from: https://github.com/eriklindernoren/Keras-GAN/blob/master/dcgan/dcgan.py    #
 #                                                                                       #
-# Is implementation of paper: Paper: https://arxiv.org/abs/1511.06434                   #
+# Is implementation of paper: https://arxiv.org/abs/1511.06434                          #
 #                                                                                       #
 #########################################################################################
 
