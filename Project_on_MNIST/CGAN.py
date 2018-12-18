@@ -136,14 +136,14 @@ class CGAN():
             #  Train Discriminator
             # ---------------------
 
-            # Select a random half batch of images
+            # Select a random half batch of images_dcgan
             idx = np.random.randint(0, X_train.shape[0], batch_size)
             imgs, labels = X_train[idx], y_train[idx]
 
             # Sample noise as generator input
             noise = np.random.normal(0, 1, (batch_size, 100))
 
-            # Generate a half batch of new images
+            # Generate a half batch of new images_dcgan
             gen_imgs = self.generator.predict([noise, labels])
 
             # Train the discriminator
@@ -175,7 +175,7 @@ class CGAN():
 
         gen_imgs = self.generator.predict([noise, sampled_labels])
 
-        # Rescale images 0 - 1
+        # Rescale images_dcgan 0 - 1
         gen_imgs = 0.5 * gen_imgs + 0.5
 
         fig, axs = plt.subplots(r, c)
@@ -186,7 +186,7 @@ class CGAN():
                 axs[i,j].set_title("Digit: %d" % sampled_labels[cnt])
                 axs[i,j].axis('off')
                 cnt += 1
-        fig.savefig("images/%d.png" % epoch)
+        fig.savefig("images_cgan/%d.png" % epoch)
         plt.close()
 
 

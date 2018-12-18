@@ -49,7 +49,7 @@ class DCGAN():
         # For the combined model we will only train the generator
         self.discriminator.trainable = False
 
-        # The discriminator takes generated images as input and determines validity
+        # The discriminator takes generated images_dcgan as input and determines validity
         valid = self.discriminator(img)
 
         # The combined model  (stacked generator and discriminator)
@@ -130,11 +130,11 @@ class DCGAN():
             #  Train Discriminator
             # ---------------------
 
-            # Select a random half of images
+            # Select a random half of images_dcgan
             idx = np.random.randint(0, X_train.shape[0], batch_size)
             imgs = X_train[idx]
 
-            # Sample noise and generate a batch of new images
+            # Sample noise and generate a batch of new images_dcgan
             noise = np.random.normal(0, 1, (batch_size, self.latent_dim))
             gen_imgs = self.generator.predict(noise)
 
@@ -147,7 +147,7 @@ class DCGAN():
             #  Train Generator
             # ---------------------
 
-            # Train the generator (wants discriminator to mistake images as real)
+            # Train the generator (wants discriminator to mistake images_dcgan as real)
             g_loss = self.combined.train_on_batch(noise, valid)
 
             # Plot the progress
@@ -162,7 +162,7 @@ class DCGAN():
         noise = np.random.normal(0, 1, (r * c, self.latent_dim))
         gen_imgs = self.generator.predict(noise)
 
-        # Rescale images 0 - 1
+        # Rescale images_dcgan 0 - 1
         gen_imgs = 0.5 * gen_imgs + 0.5
 
         fig, axs = plt.subplots(r, c)
@@ -172,7 +172,7 @@ class DCGAN():
                 axs[i,j].imshow(gen_imgs[cnt, :,:,0], cmap='gray')
                 axs[i,j].axis('off')
                 cnt += 1
-        fig.savefig("./images/mnist_%d_labeled.png" % epoch)
+        fig.savefig("./images_dcgan/mnist_%d.png" % epoch)
         plt.close()
 
 
