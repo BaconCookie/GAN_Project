@@ -16,6 +16,8 @@ import numpy as np
 
 #########################################################################################
 #                                                                                       #
+# Implementation of Deep Convolutional Generative Adversarial Network.                  #
+#                                                                                       #
 # Code from: https://github.com/eriklindernoren/Keras-GAN/blob/master/dcgan/dcgan.py    #
 #                                                                                       #
 # Is implementation of paper: https://arxiv.org/abs/1511.06434                          #
