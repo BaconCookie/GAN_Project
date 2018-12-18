@@ -14,7 +14,13 @@ import sys
 
 import numpy as np
 
-#original code: https://github.com/eriklindernoren/Keras-GAN/blob/master/dcgan/dcgan.py
+#########################################################################################
+#                                                                                       #
+# Code from: https://github.com/eriklindernoren/Keras-GAN/blob/master/dcgan/dcgan.py    #
+#                                                                                       #
+# Is implementation of paper: Paper: https://arxiv.org/abs/1511.06434                   #
+#                                                                                       #
+#########################################################################################
 
 class DCGAN():
     def __init__(self):
@@ -166,10 +172,10 @@ class DCGAN():
                 axs[i,j].imshow(gen_imgs[cnt, :,:,0], cmap='gray')
                 axs[i,j].axis('off')
                 cnt += 1
-        fig.savefig("./images/mnist_%d.png" % epoch)
+        fig.savefig("./images/mnist_%d_labeled.png" % epoch)
         plt.close()
 
 
 if __name__ == '__main__':
     dcgan = DCGAN()
-    dcgan.train(epochs=4001, batch_size=32, save_interval=50)
+    dcgan.train(epochs=1, batch_size=32, save_interval=50)
