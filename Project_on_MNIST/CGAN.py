@@ -83,9 +83,14 @@ class CGAN():
         noise = Input(shape=(self.latent_dim,))
         label = Input(shape=(1,), dtype='int32')
         label_embedding = Flatten()(Embedding(self.num_classes, self.latent_dim)(label))
+        print("build_generator, label_embedding", label_embedding)
 
         model_input = multiply([noise, label_embedding])
+        print("build_generator, model_input", model_input)
+
         img = model(model_input)
+        print("build_generator, img", img)
+
 
         return Model([noise, label], img)
 
@@ -192,4 +197,4 @@ class CGAN():
 
 if __name__ == '__main__':
     cgan = CGAN()
-    cgan.train(epochs=20000, batch_size=32, sample_interval=200)
+    cgan.train(epochs=20001, batch_size=32, sample_interval=200)
