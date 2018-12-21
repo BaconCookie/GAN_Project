@@ -14,15 +14,18 @@ import numpy as np
 
 #########################################################################################
 #                                                                                       #
-# Implementation of Conditional Generative Adversarial Nets.                            #
-#                                                                                       #
+# Combination of:                                                                       #
+#                                                                                       #                                                                                    #
+# Implementation of Deep Convolutional Generative Adversarial Network.                  #
+# Code from: https://github.com/eriklindernoren/Keras-GAN/blob/master/dcgan/dcgan.py    #
+#   &                                                                                   #
+# Implementation of Conditional Generative Adversarial Net.                             #
 # Code from: https://github.com/eriklindernoren/Keras-GAN/blob/master/cgan/cgan.py      #
 #                                                                                       #
-# Is implementation of paper: https://arxiv.org/abs/1411.1784                           #
-#                                                                                       #
+# combined by me                                                                        #
 #########################################################################################
 
-class CGAN():
+class C_DCGAN():
     def __init__(self):
         # Input shape
         self.img_rows = 28
@@ -66,18 +69,30 @@ class CGAN():
 
         model = Sequential()
 
-        model.add(Dense(256, input_dim=self.latent_dim))
-        model.add(LeakyReLU(alpha=0.2))
+        # model.add(Dense(256, input_dim=self.latent_dim))
+        # model.add(LeakyReLU(alpha=0.2))
+        # model.add(BatchNormalization(momentum=0.8))
+        # model.add(Dense(512))
+        # model.add(LeakyReLU(alpha=0.2))
+        # model.add(BatchNormalization(momentum=0.8))
+        # model.add(Dense(1024))
+        # model.add(LeakyReLU(alpha=0.2))
+        # model.add(BatchNormalization(momentum=0.8))
+        # model.add(Dense(np.prod(self.img_shape), activation='tanh'))
+        # model.add(Reshape(self.img_shape))
+        model.add(Dense(128 * 7 * 7, activation="relu", input_dim=self.latent_dim))
+        model.add(Reshape((7, 7, 128)))
+        model.add(UpSampling2D())
+        model.add(Conv2D(128, kernel_size=3, padding="same"))
         model.add(BatchNormalization(momentum=0.8))
-        model.add(Dense(512))
-        model.add(LeakyReLU(alpha=0.2))
+        model.add(Activation("relu"))
+        model.add(UpSampling2D())
+        model.add(Conv2D(64, kernel_size=3, padding="same"))
         model.add(BatchNormalization(momentum=0.8))
-        model.add(Dense(1024))
-        model.add(LeakyReLU(alpha=0.2))
-        model.add(BatchNormalization(momentum=0.8))
-        model.add(Dense(np.prod(self.img_shape), activation='tanh'))
+        model.add(Activation("relu"))
+        model.add(Conv2D(self.channels, kernel_size=3, padding="same"))
+        model.add(Activation("tanh"))
         model.add(Reshape(self.img_shape))
-
         model.summary()
 
         noise = Input(shape=(self.latent_dim,))
@@ -98,14 +113,32 @@ class CGAN():
 
         model = Sequential()
 
-        model.add(Dense(512, input_dim=np.prod(self.img_shape)))
+        # model.add(Dense(512, input_dim=np.prod(self.img_shape)))
+        # model.add(LeakyReLU(alpha=0.2))
+        # model.add(Dense(512))
+        # model.add(LeakyReLU(alpha=0.2))
+        # model.add(Dropout(0.4))
+        # model.add(Dense(512))
+        # model.add(LeakyReLU(alpha=0.2))
+        # model.add(Dropout(0.4))
+        # model.add(Dense(1, activation='sigmoid'))
+        model.add(Conv2D(32, kernel_size=3, strides=2, input_shape=self.img_shape, padding="same"))
         model.add(LeakyReLU(alpha=0.2))
-        model.add(Dense(512))
+        model.add(Dropout(0.25))
+        model.add(Conv2D(64, kernel_size=3, strides=2, padding="same"))
+        model.add(ZeroPadding2D(padding=((0, 1), (0, 1))))
+        model.add(BatchNormalization(momentum=0.8))
         model.add(LeakyReLU(alpha=0.2))
-        model.add(Dropout(0.4))
-        model.add(Dense(512))
+        model.add(Dropout(0.25))
+        model.add(Conv2D(128, kernel_size=3, strides=2, padding="same"))
+        model.add(BatchNormalization(momentum=0.8))
         model.add(LeakyReLU(alpha=0.2))
-        model.add(Dropout(0.4))
+        model.add(Dropout(0.25))
+        model.add(Conv2D(256, kernel_size=3, strides=1, padding="same"))
+        model.add(BatchNormalization(momentum=0.8))
+        model.add(LeakyReLU(alpha=0.2))
+        model.add(Dropout(0.25))
+        model.add(Flatten())
         model.add(Dense(1, activation='sigmoid'))
         model.summary()
 
@@ -191,10 +224,10 @@ class CGAN():
                 axs[i,j].set_title("Digit: %d" % sampled_labels[cnt])
                 axs[i,j].axis('off')
                 cnt += 1
-        fig.savefig("images_cgan/%d.png" % epoch)
+        fig.savefig("images_c_dcgan/%d.png" % epoch)
         plt.close()
 
 
 if __name__ == '__main__':
-    cgan = CGAN()
+    cgan = C_DCGAN()
     cgan.train(epochs=51, batch_size=32, sample_interval=50)
