@@ -87,6 +87,8 @@ class DCGAN():
 
         model = Sequential()
 
+        print("self.img_shape", self.img_shape)
+
         model.add(Conv2D(32, kernel_size=3, strides=2, input_shape=self.img_shape, padding="same"))
         model.add(LeakyReLU(alpha=0.2))
         model.add(Dropout(0.25))

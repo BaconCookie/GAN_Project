@@ -97,7 +97,8 @@ class CGAN():
     def build_discriminator(self):
 
         model = Sequential()
-
+        print("self.img_shape", self.img_shape)
+        print("np.prod(self.img_shape)",np.prod(self.img_shape))
         model.add(Dense(512, input_dim=np.prod(self.img_shape)))
         model.add(LeakyReLU(alpha=0.2))
         model.add(Dense(512))
@@ -116,9 +117,10 @@ class CGAN():
         flat_img = Flatten()(img)
 
         model_input = multiply([flat_img, label_embedding])
-
+        print("model_input", model_input)
         validity = model(model_input)
-
+        print("validity", validity)
+        print("Model([img, label], validity)", Model([img, label], validity))
         return Model([img, label], validity)
 
     def train(self, epochs, batch_size=128, sample_interval=50):

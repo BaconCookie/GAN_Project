@@ -1,5 +1,8 @@
 from __future__ import print_function, division
 
+from time import time
+
+from keras.callbacks import TensorBoard
 from keras.datasets import mnist
 from keras.layers import Input, Dense, Reshape, Flatten, Dropout, multiply
 from keras.layers import BatchNormalization, Activation, Embedding, ZeroPadding2D
@@ -122,7 +125,24 @@ class C_DCGAN():
         # model.add(LeakyReLU(alpha=0.2))
         # model.add(Dropout(0.4))
         # model.add(Dense(1, activation='sigmoid'))
-        model.add(Conv2D(32, kernel_size=3, strides=2, input_shape=self.img_shape, padding="same"))
+
+        img = Input(shape=self.img_shape)
+        print("self.img_shape", self.img_shape)
+
+        label = Input(shape=(1,), dtype='int32')
+        print("label",label)
+
+
+        label_embedding = Flatten()(Embedding(self.num_classes, np.prod(self.img_shape))(label))
+
+        print(label_embedding.shape)
+
+
+        model_input = multiply([img, label_embedding])
+        #flat_img = Flatten()(model_input)
+
+
+        model.add(Conv2D(32, kernel_size=3, strides=2, padding="same"))
         model.add(LeakyReLU(alpha=0.2))
         model.add(Dropout(0.25))
         model.add(Conv2D(64, kernel_size=3, strides=2, padding="same"))
@@ -140,18 +160,31 @@ class C_DCGAN():
         model.add(Dropout(0.25))
         model.add(Flatten())
         model.add(Dense(1, activation='sigmoid'))
-        model.summary()
+        #model.summary()
 
-        img = Input(shape=self.img_shape)
-        label = Input(shape=(1,), dtype='int32')
+        # model.add(Dense(128 * 7 * 7, activation="relu", input_dim=self.latent_dim))
+        # model.add(Reshape((7, 7, 128)))
+        # model.add(UpSampling2D())
+        # model.add(Conv2D(128, kernel_size=3, padding="same"))
+        # model.add(BatchNormalization(momentum=0.8))
+        # model.add(Activation("relu"))
+        # model.add(UpSampling2D())
+        # model.add(Conv2D(64, kernel_size=3, padding="same"))
+        # model.add(BatchNormalization(momentum=0.8))
+        # model.add(Activation("relu"))
+        # model.add(Conv2D(self.channels, kernel_size=3, padding="same"))
+        # model.add(Activation("tanh"))
+        # model.add(Reshape(self.img_shape))
+        # model.summary()
 
-        label_embedding = Flatten()(Embedding(self.num_classes, np.prod(self.img_shape))(label))
-        flat_img = Flatten()(img)
 
-        model_input = multiply([flat_img, label_embedding])
+        print("model_input", model_input)
+
+        print(model_input.shape)
 
         validity = model(model_input)
-
+        print("validity", validity)
+        print("Model([img, label], validity)", Model([img, label], validity))
         return Model([img, label], validity)
 
     def train(self, epochs, batch_size=128, sample_interval=50):
@@ -196,6 +229,8 @@ class C_DCGAN():
             # Condition on labels
             sampled_labels = np.random.randint(0, 10, batch_size).reshape(-1, 1)
 
+
+            TensorBoard(log_dir="logs/{}".format(time()))
             # Train the generator
             g_loss = self.combined.train_on_batch([noise, sampled_labels], valid)
 
@@ -230,4 +265,4 @@ class C_DCGAN():
 
 if __name__ == '__main__':
     cgan = C_DCGAN()
-    cgan.train(epochs=51, batch_size=32, sample_interval=50)
+    cgan.train(epochs=2001, batch_size=32, sample_interval=50)
