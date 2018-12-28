@@ -2,7 +2,8 @@ from __future__ import print_function, division
 
 from time import time
 
-from keras.callbacks import TensorBoard
+from keras import callbacks
+#from keras.callbacks import TensorBoard
 from keras.datasets import mnist
 from keras.layers import Input, Dense, Reshape, Flatten, Dropout, multiply
 from keras.layers import BatchNormalization, Activation, Embedding, ZeroPadding2D
@@ -29,6 +30,7 @@ import numpy as np
 #########################################################################################
 
 class C_DCGAN():
+
     def __init__(self):
         # Input shape
         self.img_rows = 28
@@ -48,6 +50,21 @@ class C_DCGAN():
 
         # Build the generator
         self.generator = self.build_generator()
+
+        # # Add TensorBoard
+        # file_path = "models/model_c_dcgan.hdf5"
+        #
+        # tensorboard = callbacks.TensorBoard(log_dir="logs/{}".format(time()), write_images=True)
+        # # tensorboard = callbacks.TensorBoard(write_images=True)
+        # checkpoint = callbacks.ModelCheckpoint(
+        #     filepath=file_path,
+        #     monitor='val_acc',
+        #     save_best_only=True,
+        #     save_weights_only=False,
+        #     mode='max')
+        #
+        # callbacks = [tensorboard, checkpoint]
+
 
         # The generator takes noise and the target label as input
         # and generates the corresponding digit of that label
@@ -187,9 +204,6 @@ class C_DCGAN():
             # Generate random labels
             sampled_labels = np.random.randint(0, 10, batch_size).reshape(-1, 1)
 
-            # Add TensorBoard
-            TensorBoard(log_dir="logs/{}".format(time()))
-
             # Train the generator
             # The generator wants to be so good that the discriminator to mistakes its generated images for real
             g_loss = self.combined.train_on_batch([noise, sampled_labels], valid)
@@ -200,6 +214,10 @@ class C_DCGAN():
             # If at save interval => save generated image samples
             if epoch % sample_interval == 0:
                 self.sample_images(epoch)
+                # save generator model
+                file_path = "models/generator_c_dcgan.hdf5"
+                self.generator.save(file_path)
+
 
     def sample_images(self, epoch):
         r, c = 2, 5
@@ -219,10 +237,10 @@ class C_DCGAN():
                 axs[i,j].set_title("Digit: %d" % sampled_labels[cnt])
                 axs[i,j].axis('off')
                 cnt += 1
-        fig.savefig("images_c_dcgan/%d.png" % epoch)
+        fig.savefig("./images_c_dcgan/c_dc_%d.png" % epoch)
         plt.close()
 
 
 if __name__ == '__main__':
     c_dcgan = C_DCGAN()
-    c_dcgan.train(epochs=51, batch_size=32, sample_interval=50)
+    c_dcgan.train(epochs=51, batch_size=32, sample_interval=200)
