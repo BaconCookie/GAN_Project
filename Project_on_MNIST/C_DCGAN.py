@@ -1,5 +1,8 @@
 from __future__ import print_function, division
 
+from time import time
+
+from keras.callbacks import TensorBoard
 from keras.datasets import mnist
 from keras.layers import Input, Dense, Reshape, Flatten, Dropout, multiply
 from keras.layers import BatchNormalization, Activation, Embedding, ZeroPadding2D
@@ -9,8 +12,6 @@ from keras.models import Sequential, Model
 from keras.optimizers import Adam
 
 import matplotlib.pyplot as plt
-
-import sys
 
 import numpy as np
 
@@ -34,14 +35,14 @@ class C_DCGAN():
         self.img_cols = 28
         self.channels = 1
         self.img_shape = (self.img_rows, self.img_cols, self.channels)
-        self.num_classes = 10 #add classes for labels
+        self.num_classes = 10  # add number of classes (labels)
         self.latent_dim = 100
 
         optimizer = Adam(0.0002, 0.5)
 
         # Build and compile the discriminator
         self.discriminator = self.build_discriminator()
-        self.discriminator.compile(loss='binary_crossentropy',
+        self.discriminator.compile(loss=['binary_crossentropy'],
             optimizer=optimizer,
             metrics=['accuracy'])
 
@@ -64,28 +65,31 @@ class C_DCGAN():
         valid = self.discriminator([img, label])
 
         # The combined model  (stacked generator and discriminator)
-        # Trains the generator to fool the discriminator
+        # Trains generator to fool discriminator
         self.combined = Model([noise, label], valid)
-        self.combined.compile(loss='binary_crossentropy', optimizer=optimizer)
+        self.combined.compile(loss=['binary_crossentropy'],
+            optimizer=optimizer)
 
     def build_generator(self):
 
-        model = Sequential()
+        generator = Sequential()
 
-        model.add(Dense(128 * 7 * 7, activation="relu", input_dim=self.latent_dim))
-        model.add(Reshape((7, 7, 128)))
-        model.add(UpSampling2D())
-        model.add(Conv2D(128, kernel_size=3, padding="same"))
-        model.add(BatchNormalization(momentum=0.8))
-        model.add(Activation("relu"))
-        model.add(UpSampling2D())
-        model.add(Conv2D(64, kernel_size=3, padding="same"))
-        model.add(BatchNormalization(momentum=0.8))
-        model.add(Activation("relu"))
-        model.add(Conv2D(self.channels, kernel_size=3, padding="same"))
-        model.add(Activation("tanh"))
+        # Generator consists of a deep convolutional net, as seen in the DCGAN example
+        generator.add(Dense(128 * 7 * 7, activation="relu", input_dim=self.latent_dim))
+        generator.add(Reshape((7, 7, 128)))
+        generator.add(UpSampling2D())
+        generator.add(Conv2D(128, kernel_size=3, padding="same"))
+        generator.add(BatchNormalization(momentum=0.8))
+        generator.add(Activation("relu"))
+        generator.add(UpSampling2D())
+        generator.add(Conv2D(64, kernel_size=3, padding="same"))
+        generator.add(BatchNormalization(momentum=0.8))
+        generator.add(Activation("relu"))
+        generator.add(Conv2D(self.channels, kernel_size=3, padding="same"))
+        generator.add(Activation("tanh"))
+        generator.add(Reshape(self.img_shape))
 
-        model.summary()
+        generator.summary()
 
         noise = Input(shape=(self.latent_dim,))
         # add label
@@ -95,53 +99,57 @@ class C_DCGAN():
         # calculate input for model
         model_input = multiply([noise, label_embedding])
         # generate an image
-        img = model(model_input)
+        img = generator(model_input)
+
+        # The Model class adds training & evaluation routines to a Network.
+        # A Network is a directed acyclic graph of layers.
+        # It is the topological form of a "model". A Model is simply a Network with added training routines.
 
         return Model([noise, label], img)
 
     def build_discriminator(self):
 
-        model = Sequential()
+        discriminator = Sequential()
 
-        model.add(Conv2D(32, kernel_size=3, strides=2, input_shape=self.img_shape, padding="same"))
-        model.add(LeakyReLU(alpha=0.2))
-        model.add(Dropout(0.25))
-        model.add(Conv2D(64, kernel_size=3, strides=2, padding="same"))
-        model.add(ZeroPadding2D(padding=((0,1),(0,1))))
-        model.add(BatchNormalization(momentum=0.8))
-        model.add(LeakyReLU(alpha=0.2))
-        model.add(Dropout(0.25))
-        model.add(Conv2D(128, kernel_size=3, strides=2, padding="same"))
-        model.add(BatchNormalization(momentum=0.8))
-        model.add(LeakyReLU(alpha=0.2))
-        model.add(Dropout(0.25))
-        model.add(Conv2D(256, kernel_size=3, strides=1, padding="same"))
-        model.add(BatchNormalization(momentum=0.8))
-        model.add(LeakyReLU(alpha=0.2))
-        model.add(Dropout(0.25))
-        model.add(Flatten())
-        model.add(Dense(1, activation='sigmoid'))
-        model.summary()
+        # Discriminator consists of a deep convolutional net, as seen in the DCGAN example
+        discriminator.add(Conv2D(32, kernel_size=3, strides=2, padding="same"))
+        discriminator.add(LeakyReLU(alpha=0.2))
+        discriminator.add(Dropout(0.25))
+        discriminator.add(Conv2D(64, kernel_size=3, strides=2, padding="same"))
+        discriminator.add(ZeroPadding2D(padding=((0, 1), (0, 1))))
+        discriminator.add(BatchNormalization(momentum=0.8))
+        discriminator.add(LeakyReLU(alpha=0.2))
+        discriminator.add(Dropout(0.25))
+        discriminator.add(Conv2D(128, kernel_size=3, strides=2, padding="same"))
+        discriminator.add(BatchNormalization(momentum=0.8))
+        discriminator.add(LeakyReLU(alpha=0.2))
+        discriminator.add(Dropout(0.25))
+        discriminator.add(Conv2D(256, kernel_size=3, strides=1, padding="same"))
+        discriminator.add(BatchNormalization(momentum=0.8))
+        discriminator.add(LeakyReLU(alpha=0.2))
+        discriminator.add(Dropout(0.25))
+        discriminator.add(Flatten())
+        discriminator.add(Dense(1, activation='sigmoid'))
+        # model.summary() # produces ValueError: This model has not yet been built. Build the model first!
 
         img = Input(shape=self.img_shape)
         # add label
         label = Input(shape=(1,), dtype='int32')
         # add label_embedding
         label_embedding = Flatten()(Embedding(self.num_classes, np.prod(self.img_shape))(label))
-        flat_img = Flatten()(img)
         # calculate input for model
-        model_input = multiply([flat_img, label_embedding])
+        model_input = multiply([img, label_embedding])
         # calculate validity
-        validity = model(model_input)
+        validity = discriminator(model_input)
 
         return Model([img, label], validity)
 
-    def train(self, epochs, batch_size=128, save_interval=50):
+    def train(self, epochs, batch_size=128, sample_interval=50):
 
         # Load the dataset
         (X_train, y_train), (_, _) = mnist.load_data()
 
-        # Configure input, Rescale -1 to 1
+        # Configure input
         X_train = (X_train.astype(np.float32) - 127.5) / 127.5
         X_train = np.expand_dims(X_train, axis=3)
         y_train = y_train.reshape(-1, 1)
@@ -156,13 +164,13 @@ class C_DCGAN():
             #  Train Discriminator
             # ---------------------
 
-            # Select a random half of images_c_dcgan
+            # Select a random half batch of images_c_dcgan
             idx = np.random.randint(0, X_train.shape[0], batch_size)
-            # add labels (y_train)
             imgs, labels = X_train[idx], y_train[idx]
 
             # Sample noise as generator input
-            noise = np.random.normal(0, 1, (batch_size, self.latent_dim))
+            noise = np.random.normal(0, 1, (batch_size, 100))
+
             # Generate a half batch of new images_c_dcgan
             gen_imgs = self.generator.predict([noise, labels])
 
@@ -176,38 +184,45 @@ class C_DCGAN():
             #  Train Generator
             # ---------------------
 
-            # Condition on labels
+            # Generate random labels
             sampled_labels = np.random.randint(0, 10, batch_size).reshape(-1, 1)
 
-            # Train the generator (wants discriminator to mistake images_c_dcgan as real)
+            # Add TensorBoard
+            TensorBoard(log_dir="logs/{}".format(time()))
+
+            # Train the generator
+            # The generator wants to be so good that the discriminator to mistakes its generated images for real
             g_loss = self.combined.train_on_batch([noise, sampled_labels], valid)
 
             # Plot the progress
             print ("%d [D loss: %f, acc.: %.2f%%] [G loss: %f]" % (epoch, d_loss[0], 100*d_loss[1], g_loss))
 
             # If at save interval => save generated image samples
-            if epoch % save_interval == 0:
-                self.save_imgs(epoch)
+            if epoch % sample_interval == 0:
+                self.sample_images(epoch)
 
-    def save_imgs(self, epoch):
-        r, c = 5, 5
-        noise = np.random.normal(0, 1, (r * c, self.latent_dim))
-        gen_imgs = self.generator.predict(noise)
+    def sample_images(self, epoch):
+        r, c = 2, 5
+        noise = np.random.normal(0, 1, (r * c, 100))
+        sampled_labels = np.arange(0, 10).reshape(-1, 1)
 
-        # Rescale images_dcgan 0 - 1
+        gen_imgs = self.generator.predict([noise, sampled_labels])
+
+        # Rescale images_c_dcgan 0 - 1
         gen_imgs = 0.5 * gen_imgs + 0.5
 
         fig, axs = plt.subplots(r, c)
         cnt = 0
         for i in range(r):
             for j in range(c):
-                axs[i,j].imshow(gen_imgs[cnt, :,:,0], cmap='gray')
+                axs[i,j].imshow(gen_imgs[cnt,:,:,0], cmap='gray')
+                axs[i,j].set_title("Digit: %d" % sampled_labels[cnt])
                 axs[i,j].axis('off')
                 cnt += 1
-        fig.savefig("./images_c_dcgan/c_dcgan_mnist_%d.png" % epoch)
+        fig.savefig("images_c_dcgan/%d.png" % epoch)
         plt.close()
 
 
 if __name__ == '__main__':
     c_dcgan = C_DCGAN()
-    c_dcgan.train(epochs=51, batch_size=32, save_interval=50)
+    c_dcgan.train(epochs=51, batch_size=32, sample_interval=50)
