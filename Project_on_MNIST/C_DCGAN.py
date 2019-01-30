@@ -5,7 +5,7 @@ from time import time
 from keras import callbacks
 #from keras.callbacks import TensorBoard
 from keras.datasets import mnist
-from keras.layers import Input, Dense, Reshape, Flatten, Dropout, multiply
+from keras.layers import Input, Dense, Reshape, Flatten, Dropout, multiply, Concatenate
 from keras.layers import BatchNormalization, Activation, Embedding, ZeroPadding2D
 from keras.layers.advanced_activations import LeakyReLU
 from keras.layers.convolutional import UpSampling2D, Conv2D
@@ -19,7 +19,7 @@ import numpy as np
 #########################################################################################
 #                                                                                       #
 # Combination of:                                                                       #
-#                                                                                       #                                                                                    #
+#                                                                                       #
 # Implementation of Deep Convolutional Generative Adversarial Network.                  #
 # Code from: https://github.com/eriklindernoren/Keras-GAN/blob/master/dcgan/dcgan.py    #
 #   &                                                                                   #
@@ -115,6 +115,8 @@ class C_DCGAN():
         label_embedding = Flatten()(Embedding(self.num_classes, self.latent_dim)(label))
         # calculate input for model
         model_input = multiply([noise, label_embedding])
+        #new_input = Concatenate()([noise, label_embedding])
+        #print("new_input: ", new_input)
         # generate an image
         img = generator(model_input)
 
@@ -243,4 +245,4 @@ class C_DCGAN():
 
 if __name__ == '__main__':
     c_dcgan = C_DCGAN()
-    c_dcgan.train(epochs=51, batch_size=32, sample_interval=200)
+    c_dcgan.train(epochs=51, batch_size=32, sample_interval=200) #history object
