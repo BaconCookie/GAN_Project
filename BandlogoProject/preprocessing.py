@@ -55,9 +55,8 @@ def plot_genres():
     ax.set_xticks(x_pos)
     ax.set_xlabel('Frequency of listed genres')
 
-    #plt.show()
+    # plt.show()
     plt.savefig('all_the_genres.png')
-
 
     # with sns.axes_style('white'):
     #     g = sns.catplot(y = counted.values(), data=counted, aspect=2,
@@ -65,41 +64,81 @@ def plot_genres():
     #     g.set_xticklabels(step=5)
 
 
+def band_data_to_dict():
+    bands = {}
+    letters = list(string.ascii_lowercase)
+    for letter in letters:
+        json_bands = read_band_data(letter)
+        for i in range(len(json_bands)):
+            band_info = json_bands[i]
+            # genre = band_info["genre"]
+            url = band_info["url"]
+            band_id = url.rsplit('/', 1)[-1]
+            bands[band_id] = band_info
+    return bands
 
-def prepoces_imgs(letter):
+
+def prepoces_imgs():
+    bands = band_data_to_dict()
     image_list = []
     images = {}
-    for filename in glob.glob('./img/{}/*.jpg'.format(letter)):
-        id = filename.rsplit('/', 1)[-1].rsplit('.', 1)[0]
-        im = Image.open(filename)
-        im = im.resize([128, 128]) # Todo resize properly with padding
-        #im = im.convert('1')  # convert to black and white
-        images[id] = im
+    letters = list(string.ascii_lowercase)
+    for letter in letters:
+        for filename in glob.glob('./img/{}/*.jpg'.format(letter)):
+            try:
+                im_id = filename.rsplit('/', 1)[-1].rsplit('.', 1)[0]
+                im = Image.open(filename)
+                im = im.resize([128, 128])  # Todo resize properly with padding
+                # im = im.convert('1')  # convert to black and white
+
+                # Todo add method getting data for this specific band # Look for IMG id in band info
+                try:
+                    band_info = bands[im_id]
+                    genre_of_band = band_info['genre']
+                    #print(genre_of_band)
+                    images[im_id] = im
+
+                except KeyError:
+                    print('Band with id {} not found in band info'.format(im_id))
+            except OSError:
+                print('OSError cause by: ', filename)
+    print('finished')
+
     # Todo add method getting data for this specific band # Look for IMG id in band info
     #  band_logo_url = 'https://www.metal-archives.com/images/3/5/4/0/'
     # Todo add method deciding genre
     # Todo save img in appropriate folder
     print(images)
 
-#----------------------------------------------------------------------
+
+prepoces_imgs()
+
+# ----------------------------------------------------------------------
 # Put all genres in a dictionary, sorted from high to low use frequency
 #
 # genres = get_all_genres()
 #
 # with open('all_genres_listed.json', 'w') as f:
 #     f.write(json.dumps(genres))
-#----------------------------------------------------------------------
+# ----------------------------------------------------------------------
 
+
+# ----------------------------------------------------------------------
+# Mini-script to get some data insight in numbers
+#
+# g = read_all_genres()
+# number_of_bands = sum(value >= 1000 for value in g.values())
+# print(number_of_bands)
+# ----------------------------------------------------------------------
 
 # plot_genres()
 
-g = read_all_genres()
-print(g)
-ones = sum(value >= 1000 for value in g.values())
+# genres = read_all_genres()
 
-print(ones)
-'''last_band_index = len(json_bands) - 1
-band = json_bands[last_band_index]
+# b = band_data_to_dict()
+# print(b)
+# print(b['3739']['url'])
+'''band = json_bands[last_band_index]
 print(band)
 
 print(band["genre"])
