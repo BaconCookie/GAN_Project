@@ -15,12 +15,17 @@ def read_band_data(letter):
     return json_data
 
 
+def read_all_genres():
+    with open('all_genres_listed.json', 'r') as json_file:
+        json_data = json.load(json_file)
+    return json_data
+
+
 def get_all_genres():
     genres = []
     letters = list(string.ascii_lowercase)
     for letter in letters:
         json_bands = read_band_data(letter)
-        last_band_index = len(json_bands) - 1
         for i in range(len(json_bands)):
             band = json_bands[i]
             genres.append(band["genre"])
@@ -67,24 +72,32 @@ def prepoces_imgs(letter):
     for filename in glob.glob('./img/{}/*.jpg'.format(letter)):
         id = filename.rsplit('/', 1)[-1].rsplit('.', 1)[0]
         im = Image.open(filename)
-        im = im.resize([128, 128]) #Todo resize properly with padding
+        im = im.resize([128, 128]) # Todo resize properly with padding
         #im = im.convert('1')  # convert to black and white
         images[id] = im
-
+    # Todo add method getting data for this specific band # Look for IMG id in band info
+    #  band_logo_url = 'https://www.metal-archives.com/images/3/5/4/0/'
+    # Todo add method deciding genre
+    # Todo save img in appropriate folder
     print(images)
 
-
+#----------------------------------------------------------------------
+# Put all genres in a dictionary, sorted from high to low use frequency
+#
 # genres = get_all_genres()
 #
-# with open('all_genres_listed.txt', 'w') as f:
+# with open('all_genres_listed.json', 'w') as f:
 #     f.write(json.dumps(genres))
+#----------------------------------------------------------------------
 
-plot_genres()
 
+# plot_genres()
 
-# print(len(json_data))
-# print(json_data)
+g = read_all_genres()
+print(g)
+ones = sum(value >= 1000 for value in g.values())
 
+print(ones)
 '''last_band_index = len(json_bands) - 1
 band = json_bands[last_band_index]
 print(band)
