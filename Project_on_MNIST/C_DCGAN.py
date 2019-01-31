@@ -5,7 +5,7 @@ from time import time
 from keras import callbacks
 #from keras.callbacks import TensorBoard
 from keras.datasets import mnist
-from keras.layers import Input, Dense, Reshape, Flatten, Dropout, multiply, Concatenate
+from keras.layers import Input, Dense, Reshape, Flatten, Dropout, multiply, Concatenate, concatenate
 from keras.layers import BatchNormalization, Activation, Embedding, ZeroPadding2D
 from keras.layers.advanced_activations import LeakyReLU
 from keras.layers.convolutional import UpSampling2D, Conv2D
@@ -115,10 +115,16 @@ class C_DCGAN():
         label_embedding = Flatten()(Embedding(self.num_classes, self.latent_dim)(label))
         # calculate input for model
         model_input = multiply([noise, label_embedding])
-        #new_input = Concatenate()([noise, label_embedding])
-        #print("new_input: ", new_input)
+        print("model_input: ", np.shape(model_input))
+
+        new_input = concatenate([noise, label_embedding])
+        print("new_input: ", np.shape(new_input))
+
+        #np_input = np.concatenate((label, noise))
+        #print("np_input: ", np.shape(np_input))
+
         # generate an image
-        img = generator(model_input)
+        img = generator(new_input)
 
         # The Model class adds training & evaluation routines to a Network.
         # A Network is a directed acyclic graph of layers.
