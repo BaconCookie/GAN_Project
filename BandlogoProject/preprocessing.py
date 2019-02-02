@@ -82,39 +82,76 @@ def band_data_to_dict():
 #im_sizes = []
 
 
+undecided = []
+
+
+def decide_genre(original):
+    original = original.lower()
+    if 'core' in original or 'grind' in original or 'nu' in original:
+        genre = 'core'
+    elif 'gothic' in original:
+        genre = 'gothic'
+    elif 'pagan' in original or 'viking' in original or 'folk' in original:
+        genre = 'pagan'
+    elif 'black' in original:
+        genre = 'black'
+    elif 'death' in original:
+        genre = 'death'
+    elif 'thrash' in original or 'groove' in original:
+        genre = 'thrash'
+    elif 'heavy' in original or 'nsobhm' in original:
+        genre = 'heavy'
+    elif 'power' in original or 'speed' in original:
+        genre = 'power'
+    elif 'doom' in original or 'stoner' in original or 'sludge' in original:
+        genre = 'doom'
+    elif 'prog' in original or 'shred' in original:
+        genre = 'progressive'
+    elif 'symphonic' in original:
+        genre = 'gothic'
+    else:
+        genre = 'undecided'
+        undecided.append(original)
+    return genre
+
+
 def prepoces_imgs():
-    bands = band_data_to_dict()
+    bands_dict = band_data_to_dict()
     image_list = []
+    genres = []
     images = {}
     letters = list(string.ascii_lowercase)
     for letter in letters:
         for filename in glob.glob('./img/{}/*.jpg'.format(letter)):
             try:
+                # Preprocess image
                 im_id = filename.rsplit('/', 1)[-1].rsplit('.', 1)[0]
                 im = Image.open(filename)
                 im = im.resize([128, 64])
                 im = im.convert('RGB')  # convert to RGB
                 # im = im.convert('1')  # convert to black and white
 
-                # Todo add method getting data for this specific band # Look for IMG id in band info
+                # im_modes.append(im.mode)
+                # im_sizes.append(im.size)
                 try:
-                    band_info = bands[im_id]
-                    genre_of_band = band_info['genre']
-                    #print(genre_of_band)
-                    images[im_id] = im
+                    band_info = bands_dict[im_id]
 
-                    #im_modes.append(im.mode)
-                    #im_sizes.append(im.size)
-                    # Todo add method getting data for this specific band # Look for IMG id in band info
-                    #  band_logo_url = 'https://www.metal-archives.com/images/3/5/4/0/'
+                    images[im_id] = im  # Saves image in dict with band id as key
+
+                    original_genre = band_info['genre']
+                    # print(original_genre)
                     # Todo add method deciding genre
-                    genre = 'x'
-                    # Todo save img in appropriate folder
-                    im.save('./processed_img/{}/{}.jpg'.format(genre, im_id), 'JPEG')
+                    genre = decide_genre(original_genre)
+                    if genre is not 'undecided':
+
+                        # Todo save img in appropriate folder
+                        genres.append(genre)
+                        #im.save('./processed_img/{}/{}.jpg'.format(genre, im_id), 'JPEG')
                 except KeyError:
                     print('Band with id {} throws KeyError'.format(im_id))
             except OSError:
                 print('OSError caused by: ', filename)
+    print(Counter(genres))
 
 
     # with open('all_genres_listed.json', 'w') as f:
@@ -123,6 +160,8 @@ def prepoces_imgs():
 
 
 pre = prepoces_imgs()
+
+print(Counter(undecided))
 
 # ----------------------------------------------------------------------
 # Put all genres in a dictionary, sorted from high to low use frequency
