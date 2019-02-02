@@ -89,7 +89,7 @@ def decide_genre(original):
     original = original.lower()
     if 'core' in original or 'grind' in original or 'nu' in original:
         genre = 'core'
-    elif 'gothic' in original:
+    elif 'gothic' in original or 'avant-garde' in original:
         genre = 'gothic'
     elif 'pagan' in original or 'viking' in original or 'folk' in original:
         genre = 'pagan'
@@ -103,12 +103,14 @@ def decide_genre(original):
         genre = 'heavy'
     elif 'power' in original or 'speed' in original:
         genre = 'power'
-    elif 'doom' in original or 'stoner' in original or 'sludge' in original:
+    elif 'doom' in original or 'stoner' in original or 'sludge' in original or 'depressive':
         genre = 'doom'
-    elif 'prog' in original or 'shred' in original:
+    elif 'prog' in original or 'experimental' in original or 'shred' in original:
         genre = 'progressive'
     elif 'symphonic' in original:
         genre = 'gothic'
+    elif 'post' in original or 'shoegaze' in original:
+        genre = 'black'
     else:
         genre = 'undecided'
         undecided.append(original)
