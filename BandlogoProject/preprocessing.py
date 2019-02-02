@@ -110,7 +110,7 @@ def prepoces_imgs():
                     # Todo add method deciding genre
                     genre = 'x'
                     # Todo save img in appropriate folder
-                    im.save('./processed_img/{}/{}.jpg'.format(genre, im_id), 'jpg')
+                    im.save('./processed_img/{}/{}.jpg'.format(genre, im_id), 'JPEG')
                 except KeyError:
                     print('Band with id {} throws KeyError'.format(im_id))
             except OSError:
