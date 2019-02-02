@@ -99,7 +99,7 @@ def decide_genre(original):
         genre = 'death'
     elif 'thrash' in original or 'groove' in original:
         genre = 'thrash'
-    elif 'heavy' in original or 'nsobhm' in original:
+    elif 'heavy' in original or 'nwobhm' in original:
         genre = 'heavy'
     elif 'power' in original or 'speed' in original:
         genre = 'power'
