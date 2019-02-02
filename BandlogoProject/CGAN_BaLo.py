@@ -21,6 +21,8 @@ import numpy as np
 # Is implementation of paper: https://arxiv.org/abs/1411.1784                           #
 #                                                                                       #
 #########################################################################################
+from keras_preprocessing.image import ImageDataGenerator
+
 
 class CGAN():
     def __init__(self):
@@ -122,6 +124,9 @@ class CGAN():
         print("validity", validity)
         print("Model([img, label], validity)", Model([img, label], validity))
         return Model([img, label], validity)
+
+    def train_datagen(self):
+        return ImageDataGenerator(rescale=1./255)
 
     def train(self, epochs, batch_size=128, sample_interval=50):
 

@@ -78,6 +78,10 @@ def band_data_to_dict():
     return bands
 
 
+#im_modes = []
+#im_sizes = []
+
+
 def prepoces_imgs():
     bands = band_data_to_dict()
     image_list = []
@@ -88,7 +92,8 @@ def prepoces_imgs():
             try:
                 im_id = filename.rsplit('/', 1)[-1].rsplit('.', 1)[0]
                 im = Image.open(filename)
-                im = im.resize([128, 128])  # Todo resize properly with padding
+                im = im.resize([128, 64])
+                im = im.convert('RGB')  # convert to RGB
                 # im = im.convert('1')  # convert to black and white
 
                 # Todo add method getting data for this specific band # Look for IMG id in band info
@@ -98,20 +103,26 @@ def prepoces_imgs():
                     #print(genre_of_band)
                     images[im_id] = im
 
+                    #im_modes.append(im.mode)
+                    #im_sizes.append(im.size)
+                    # Todo add method getting data for this specific band # Look for IMG id in band info
+                    #  band_logo_url = 'https://www.metal-archives.com/images/3/5/4/0/'
+                    # Todo add method deciding genre
+                    genre = 'x'
+                    # Todo save img in appropriate folder
+                    im.save('./processed_img/{}/{}.jpg'.format(genre, im_id), 'jpg')
                 except KeyError:
-                    print('Band with id {} not found in band info'.format(im_id))
+                    print('Band with id {} throws KeyError'.format(im_id))
             except OSError:
-                print('OSError cause by: ', filename)
-    print('finished')
-
-    # Todo add method getting data for this specific band # Look for IMG id in band info
-    #  band_logo_url = 'https://www.metal-archives.com/images/3/5/4/0/'
-    # Todo add method deciding genre
-    # Todo save img in appropriate folder
-    print(images)
+                print('OSError caused by: ', filename)
 
 
-prepoces_imgs()
+    # with open('all_genres_listed.json', 'w') as f:
+    #     f.write(json.dumps(images))
+    #print(images)
+
+
+pre = prepoces_imgs()
 
 # ----------------------------------------------------------------------
 # Put all genres in a dictionary, sorted from high to low use frequency
@@ -124,12 +135,49 @@ prepoces_imgs()
 
 
 # ----------------------------------------------------------------------
-# Mini-script to get some data insight in numbers
+# Mini-script to get some data insight in numbers concerning genres
 #
 # g = read_all_genres()
 # number_of_bands = sum(value >= 1000 for value in g.values())
 # print(number_of_bands)
 # ----------------------------------------------------------------------
+
+
+# ----------------------------------------------------------------------
+# Mini-script to get some data insight in numbers concerning image modes
+#
+# In order to run, uncomment code concerning im_modes in the code above!
+#
+# pre = prepoces_imgs()
+# print(len(im_modes))
+# print('L', im_modes.count('L'))
+# print('RGB', im_modes.count('RGB'))
+# number_of_modes = Counter(im_modes)
+# print(number_of_modes)
+# ----------------------------------------------------------------------
+
+
+# ----------------------------------------------------------------------
+# Mini-script to get some data insight in numbers concerning image sizes
+#
+# In order to run, uncomment code concerning im_sizes in the code above!
+#
+# pre = prepoces_imgs()
+#
+# number_of_sizes = Counter(im_sizes)
+# #print(number_of_sizes)
+#
+# keys = number_of_sizes.keys()
+# print(len(keys))
+# h = np.mean([x[0] for x in keys])
+# w = np.mean([x[1] for x in keys])
+# print(h, w)
+# hv = np.var([x[0] for x in keys])
+# wv = np.var([x[1] for x in keys])
+# print(hv, wv)
+# ----------------------------------------------------------------------
+
+
 
 # plot_genres()
 
