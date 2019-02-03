@@ -128,6 +128,9 @@ class CGAN():
         print("Model([img, label], validity)", Model([img, label], validity))
         return Model([img, label], validity)
 
+
+
+
     # Belongs to TensorFlow EXAMPLE:
     # def train_datagen(self):
     #     return ImageDataGenerator(rescale=1. / 255)
