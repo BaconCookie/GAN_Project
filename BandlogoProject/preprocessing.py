@@ -8,6 +8,13 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
+#im_modes = []
+#im_sizes = []
+
+
+undecided = []
+
+
 def read_band_data(letter):
     with open("./half_clean_info/{}.json".format(letter), encoding='utf-8-sig') as json_file:
         json_data = json.load(json_file)
@@ -78,20 +85,13 @@ def band_data_to_dict():
     return bands
 
 
-#im_modes = []
-#im_sizes = []
-
-
-undecided = []
-
-
 def decide_genre(original):
     original = original.lower()
     if 'core' in original or 'grind' in original or 'nu' in original:
         genre = 'core'
     elif 'gothic' in original or 'avant-garde' in original:
         genre = 'gothic'
-    elif 'pagan' in original or 'viking' in original or 'folk' in original:
+    elif 'pagan' in original or 'viking' in original or 'folk' in original or 'celtic' in original:
         genre = 'pagan'
     elif 'black' in original:
         genre = 'black'
@@ -103,7 +103,7 @@ def decide_genre(original):
         genre = 'heavy'
     elif 'power' in original or 'speed' in original:
         genre = 'power'
-    elif 'doom' in original or 'stoner' in original or 'sludge' in original or 'depressive':
+    elif 'doom' in original or 'stoner' in original or 'sludge' in original or 'depressive' in original or 'dark' in original:
         genre = 'doom'
     elif 'prog' in original or 'experimental' in original or 'shred' in original:
         genre = 'progressive'
@@ -121,7 +121,6 @@ def prepoces_imgs():
     bands_dict = band_data_to_dict()
     image_list = []
     genres = []
-    images = {}
     letters = list(string.ascii_lowercase)
     for letter in letters:
         for filename in glob.glob('./img/{}/*.jpg'.format(letter)):
@@ -137,33 +136,25 @@ def prepoces_imgs():
                 # im_sizes.append(im.size)
                 try:
                     band_info = bands_dict[im_id]
-
-                    images[im_id] = im  # Saves image in dict with band id as key
-
                     original_genre = band_info['genre']
-                    # print(original_genre)
-                    # Todo add method deciding genre
                     genre = decide_genre(original_genre)
                     if genre is not 'undecided':
-
-                        # Todo save img in appropriate folder
-                        genres.append(genre)
-                        #im.save('./processed_img/{}/{}.jpg'.format(genre, im_id), 'JPEG')
+                        name = band_info['name']
+                        name = name.translate({ord(c): " " for c in "!@#$%^&*()[]{};:.,/<>?\|`~-=_+"})# Remove special chars
+                        #genres.append(name)
+                        im.save('./processed_img/{}/{}_{}.jpg'.format(genre, name, im_id), 'JPEG')
+                    else:
+                        undecided.append(band_info)
                 except KeyError:
-                    print('Band with id {} throws KeyError'.format(im_id))
+                    print('Band with id {} throws KeyError. Band info: '.format(im_id), band_info)
             except OSError:
-                print('OSError caused by: ', filename)
-    print(Counter(genres))
-
-
-    # with open('all_genres_listed.json', 'w') as f:
-    #     f.write(json.dumps(images))
-    #print(images)
+                print('OSError caused by: ', filename, band_info)
+    #print(Counter(genres))
+    #print(Counter(undecided))
 
 
 pre = prepoces_imgs()
 
-print(Counter(undecided))
 
 # ----------------------------------------------------------------------
 # Put all genres in a dictionary, sorted from high to low use frequency
@@ -189,7 +180,7 @@ print(Counter(undecided))
 #
 # In order to run, uncomment code concerning im_modes in the code above!
 #
-# pre = prepoces_imgs()
+# prepoces_imgs()
 # print(len(im_modes))
 # print('L', im_modes.count('L'))
 # print('RGB', im_modes.count('RGB'))
@@ -203,7 +194,7 @@ print(Counter(undecided))
 #
 # In order to run, uncomment code concerning im_sizes in the code above!
 #
-# pre = prepoces_imgs()
+# prepoces_imgs()
 #
 # number_of_sizes = Counter(im_sizes)
 # #print(number_of_sizes)
