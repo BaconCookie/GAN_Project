@@ -1,5 +1,8 @@
 from __future__ import print_function, division
 
+import glob
+
+from PIL import Image
 from keras.datasets import mnist
 from keras.layers import Input, Dense, Reshape, Flatten, Dropout, multiply
 from keras.layers import BatchNormalization, Activation, Embedding, ZeroPadding2D
@@ -7,6 +10,7 @@ from keras.layers.advanced_activations import LeakyReLU
 from keras.layers.convolutional import UpSampling2D, Conv2D
 from keras.models import Sequential, Model
 from keras.optimizers import Adam
+from keras.utils import to_categorical
 
 import matplotlib.pyplot as plt
 
@@ -39,8 +43,8 @@ class CGAN():
         # Build and compile the discriminator
         self.discriminator = self.build_discriminator()
         self.discriminator.compile(loss=['binary_crossentropy'],
-            optimizer=optimizer,
-            metrics=['accuracy'])
+                                   optimizer=optimizer,
+                                   metrics=['accuracy'])
 
         # Build the generator
         self.generator = self.build_generator()
@@ -62,7 +66,7 @@ class CGAN():
         # Trains generator to fool discriminator
         self.combined = Model([noise, label], valid)
         self.combined.compile(loss=['binary_crossentropy'],
-            optimizer=optimizer)
+                              optimizer=optimizer)
 
     def build_generator(self):
 
@@ -93,14 +97,13 @@ class CGAN():
         img = model(model_input)
         print("build_generator, img", img)
 
-
         return Model([noise, label], img)
 
     def build_discriminator(self):
 
         model = Sequential()
         print("self.img_shape", self.img_shape)
-        print("np.prod(self.img_shape)",np.prod(self.img_shape))
+        print("np.prod(self.img_shape)", np.prod(self.img_shape))
         model.add(Dense(512, input_dim=np.prod(self.img_shape)))
         model.add(LeakyReLU(alpha=0.2))
         model.add(Dense(512))
@@ -125,18 +128,50 @@ class CGAN():
         print("Model([img, label], validity)", Model([img, label], validity))
         return Model([img, label], validity)
 
-    def train_datagen(self):
-        return ImageDataGenerator(rescale=1./255)
+    # Belongs to TensorFlow EXAMPLE:
+    # def train_datagen(self):
+    #     return ImageDataGenerator(rescale=1. / 255)
+
+    #TODO finish this method
+    def load_data(self, n_images):
+        data = np.empty((n_images, 3, 128, 64), dtype='float32') # number of images, n channels (3 = RGB), w, h
+        label = np.empty((n_images,), dtype='uint8')
+        classes = ['black', 'core', 'death', 'doom', 'gothic', 'heavy', 'pagan', 'power', 'progressive', 'thrash']
+        #n = 0
+        for c in classes:
+            for filename in glob.glob('./preprocessed_img/{}/*.jpg'.format(c)):
+                try:
+
+                    #im_id = filename.rsplit('/', 1)[-1].rsplit('.', 1)[0]
+                    img = Image.open(filename)
+                    arr = np.asarray(img, dtype='float32')
+
+                except OSError:
+                    pass
+
+        return data, label
+
 
     def train(self, epochs, batch_size=128, sample_interval=50):
 
-        # Load the dataset
+        # Load the dataset TODO load own data n_images=2827
         (X_train, y_train), (_, _) = mnist.load_data()
+
+        # TODO check if needed:
+        # int_labels = 0
+        # categorical_labels = to_categorical(int_labels, num_classes=None) #to_categorical translates labels to one-hot-enc vector
+
+        # TensorFlow EXAMPLE:
+        # train_generator = train_datagen.flow_from_directory(
+        #     train_data_dir,
+        #     target_size=(img_width, img_height),
+        #     batch_size=batch_size,
+        #     class_mode='categorical')
 
         # Configure input
         X_train = (X_train.astype(np.float32) - 127.5) / 127.5
-        X_train = np.expand_dims(X_train, axis=3)
-        y_train = y_train.reshape(-1, 1)
+        X_train = np.expand_dims(X_train, axis=3)  # TODO check what it does
+        y_train = y_train.reshape(-1, 1)  # TODO : horizontal to vertical vector
 
         # Adversarial ground truths
         valid = np.ones((batch_size, 1))
@@ -174,7 +209,7 @@ class CGAN():
             g_loss = self.combined.train_on_batch([noise, sampled_labels], valid)
 
             # Plot the progress
-            print ("%d [D loss: %f, acc.: %.2f%%] [G loss: %f]" % (epoch, d_loss[0], 100*d_loss[1], g_loss))
+            print("%d [D loss: %f, acc.: %.2f%%] [G loss: %f]" % (epoch, d_loss[0], 100 * d_loss[1], g_loss))
 
             # If at save interval => save generated image samples
             if epoch % sample_interval == 0:
@@ -187,21 +222,21 @@ class CGAN():
 
         gen_imgs = self.generator.predict([noise, sampled_labels])
 
-        # Rescale images_cgan 0 - 1
-        gen_imgs = 0.5 * gen_imgs + 0.5
+        # # Rescale images_cgan 0 - 1
+        # gen_imgs = 0.5 * gen_imgs + 0.5
 
         fig, axs = plt.subplots(r, c)
         cnt = 0
         for i in range(r):
             for j in range(c):
-                axs[i,j].imshow(gen_imgs[cnt,:,:,0], cmap='gray')
-                axs[i,j].set_title("Digit: %d" % sampled_labels[cnt])
-                axs[i,j].axis('off')
+                axs[i, j].imshow(gen_imgs[cnt, :, :, 0], cmap='gray')  # TODO maybe change cmap to color / RGB?
+                axs[i, j].set_title("Digit: %d" % sampled_labels[cnt])
+                axs[i, j].axis('off')
                 cnt += 1
-        fig.savefig("images_cgan/%d.png" % epoch)
+        fig.savefig("images_cgan_BaLo/%d.png" % epoch)
         plt.close()
 
 
 if __name__ == '__main__':
     cgan = CGAN()
-    cgan.train(epochs=51, batch_size=32, sample_interval=50) #TODO adjust batch size to what fits in memory
+    cgan.train(epochs=51, batch_size=32, sample_interval=50)  # TODO adjust batch size to what fits in memory

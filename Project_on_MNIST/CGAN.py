@@ -130,8 +130,14 @@ class CGAN():
 
         # Configure input
         X_train = (X_train.astype(np.float32) - 127.5) / 127.5
+
+        #print('X_train 1 ', X_train)
         X_train = np.expand_dims(X_train, axis=3)
+        #print('X_train 2 ', X_train)
+
+        #print('y_train 1 ', y_train)
         y_train = y_train.reshape(-1, 1)
+        #print('y_train 2 ', y_train)
 
         # Adversarial ground truths
         valid = np.ones((batch_size, 1))
