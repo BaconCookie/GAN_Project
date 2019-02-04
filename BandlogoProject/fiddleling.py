@@ -47,6 +47,8 @@ def load_data(n_images):
             i += 1
         except OSError:
             print('OSError caused by: ', img)
+        except KeyError:
+            print('OSError caused by: ', img, genre)
     return data, label
 
 
