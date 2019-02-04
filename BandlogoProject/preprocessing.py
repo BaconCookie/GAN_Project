@@ -7,9 +7,8 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import numpy as np
 
-
-#im_modes = []
-#im_sizes = []
+# im_modes = []
+# im_sizes = []
 
 
 undecided = []
@@ -122,6 +121,7 @@ def prepoces_imgs():
     image_list = []
     genres = []
     letters = list(string.ascii_lowercase)
+    i = 0
     for letter in letters:
         for filename in glob.glob('./img/{}/*.jpg'.format(letter)):
             try:
@@ -139,21 +139,25 @@ def prepoces_imgs():
                     original_genre = band_info['genre']
                     genre = decide_genre(original_genre)
                     if genre is not 'undecided':
-                        name = band_info['name']
-                        name = name.translate({ord(c): " " for c in "!@#$%^&*()[]{};:.,/<>?\|`~-=_+"})# Remove special chars
-                        #genres.append(name)
-                        im.save('./processed_img/{}/{}_{}.jpg'.format(genre, name, im_id), 'JPEG')
+                        i += 1
+                        # name = band_info['name']
+                        # name = name.translate({ord(c): " " for c in "!@#$%^&*()[]{};:.,/<>?\|`~-=_+"})# Remove special chars
+                        # genres.append(name)
+                        # im.save('./preprocessed_img/{}/{}_{}.jpg'.format(genre, name, im_id), 'JPEG')
+                        im.save('./preprocessed_imgs_all/{}_{}.jpg'.format(genre, i), 'JPEG')
+
                     else:
                         undecided.append(band_info)
                 except KeyError:
                     print('Band with id {} throws KeyError. Band info: '.format(im_id), band_info)
             except OSError:
                 print('OSError caused by: ', filename, band_info)
-    #print(Counter(genres))
-    #print(Counter(undecided))
+    # print(Counter(genres))
+    # print(Counter(undecided))
 
 
-pre = prepoces_imgs()
+# pre = prepoces_imgs()
+
 
 
 # ----------------------------------------------------------------------
@@ -208,7 +212,6 @@ pre = prepoces_imgs()
 # wv = np.var([x[1] for x in keys])
 # print(hv, wv)
 # ----------------------------------------------------------------------
-
 
 
 # plot_genres()

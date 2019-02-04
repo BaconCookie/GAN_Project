@@ -128,32 +128,40 @@ class CGAN():
         print("Model([img, label], validity)", Model([img, label], validity))
         return Model([img, label], validity)
 
+        # Belongs to TensorFlow EXAMPLE:
+        # def train_datagen(self):
+        #     return ImageDataGenerator(rescale=1. / 255)
 
+        # TODO finish this method, or the other load_data, whatever works!
+        def load_data_w_separate_classes(self, n_images):
+            data = np.empty((n_images, 3, 128, 64), dtype='float32')  # number of images, n channels (3 = RGB), w, h
+            label = np.empty((n_images,), dtype='uint8')
+            classes = ['black', 'core', 'death', 'doom', 'gothic', 'heavy', 'pagan', 'power', 'progressive', 'thrash']
+            # n = 0
+            for c in classes:
+                for filename in glob.glob('./preprocessed_img/{}/*.jpg'.format(c)):
+                    try:
+                        img = Image.open(filename)
+                        arr = np.asarray(img, dtype='float32')
 
+                    except OSError:
+                        print('OSError caused by: ', img, arr)
 
-    # Belongs to TensorFlow EXAMPLE:
-    # def train_datagen(self):
-    #     return ImageDataGenerator(rescale=1. / 255)
+            return data, label
 
-    #TODO finish this method
-    def load_data(self, n_images):
-        data = np.empty((n_images, 3, 128, 64), dtype='float32') # number of images, n channels (3 = RGB), w, h
-        label = np.empty((n_images,), dtype='uint8')
-        classes = ['black', 'core', 'death', 'doom', 'gothic', 'heavy', 'pagan', 'power', 'progressive', 'thrash']
-        #n = 0
-        for c in classes:
-            for filename in glob.glob('./preprocessed_img/{}/*.jpg'.format(c)):
+        def load_data(self, n_images):
+            data = np.empty((n_images, 3, 128, 64), dtype='float32')  # number of images, n channels (3 = RGB), w, h
+            label = np.empty((n_images,), dtype='uint8')
+            for filename in glob.glob('./preprocessed_imgs_all/*.jpg'):
                 try:
-
-                    #im_id = filename.rsplit('/', 1)[-1].rsplit('.', 1)[0]
                     img = Image.open(filename)
                     arr = np.asarray(img, dtype='float32')
+                    label = filename.rsplit('/', 1)[-1].rsplit('_', 1)[0]
 
                 except OSError:
-                    pass
+                    print('OSError caused by: ', img, arr)
 
-        return data, label
-
+            return data, label
 
     def train(self, epochs, batch_size=128, sample_interval=50):
 
@@ -241,5 +249,7 @@ class CGAN():
 
 
 if __name__ == '__main__':
+
     cgan = CGAN()
-    cgan.train(epochs=51, batch_size=32, sample_interval=50)  # TODO adjust batch size to what fits in memory
+
+    #cgan.train(epochs=51, batch_size=32, sample_interval=50)  # TODO adjust batch size to what fits in memory
