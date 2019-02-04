@@ -5,9 +5,7 @@ import numpy as np
 
 def get_label(genre):
     if genre == 'black':
-        # label = np.zeros(10,) #[(1, 0, 0, 0, 0, 0, 0, 0, 0, 0)]
         label = np.array([1, 0, 0, 0, 0, 0, 0, 0, 0, 0])
-        # print(label)
     elif genre == 'core':
         label = np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 0])
     elif genre == 'death':
