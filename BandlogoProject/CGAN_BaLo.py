@@ -31,9 +31,9 @@ from keras_preprocessing.image import ImageDataGenerator
 class CGAN():
     def __init__(self):
         # Input shape
-        self.img_rows = 28
-        self.img_cols = 28
-        self.channels = 1
+        self.img_rows = 64
+        self.img_cols = 128
+        self.channels = 3
         self.img_shape = (self.img_rows, self.img_cols, self.channels)
         self.num_classes = 10
         self.latent_dim = 100
@@ -148,41 +148,80 @@ class CGAN():
                         print('OSError caused by: ', img, arr)
 
             return data, label
+        #
+        # def load_data(self, n_images):
+        #     data = np.empty((n_images, 3, 128, 64), dtype='float32')  # number of images, n channels (3 = RGB), w, h
+        #     label = np.empty((n_images,), dtype='uint8')
+        #     for filename in glob.glob('./preprocessed_imgs_all/*.jpg'):
+        #         try:
+        #             img = Image.open(filename)
+        #             arr = np.asarray(img, dtype='float32')
+        #             label = filename.rsplit('/', 1)[-1].rsplit('_', 1)[0]
+        #
+        #         except OSError:
+        #             print('OSError caused by: ', img, arr)
+        #
+        #     return data, label
 
-        def load_data(self, n_images):
-            data = np.empty((n_images, 3, 128, 64), dtype='float32')  # number of images, n channels (3 = RGB), w, h
-            label = np.empty((n_images,), dtype='uint8')
-            for filename in glob.glob('./preprocessed_imgs_all/*.jpg'):
-                try:
-                    img = Image.open(filename)
-                    arr = np.asarray(img, dtype='float32')
-                    label = filename.rsplit('/', 1)[-1].rsplit('_', 1)[0]
+    def get_label(self, genre):
+        if genre == 'black':
+            label = np.array([1, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+        elif genre == 'core':
+            label = np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 0])
+        elif genre == 'death':
+            label = np.array([0, 0, 1, 0, 0, 0, 0, 0, 0, 0])
+        elif genre == 'doom':
+            label = np.array([0, 0, 0, 1, 0, 0, 0, 0, 0, 0])
+        elif genre == 'gothic':
+            label = np.array([0, 0, 0, 0, 1, 0, 0, 0, 0, 0])
+        elif genre == 'heavy':
+            label = np.array([0, 0, 0, 0, 0, 1, 0, 0, 0, 0])
+        elif genre == 'pagan':
+            label = np.array([0, 0, 0, 0, 0, 0, 1, 0, 0, 0])
+        elif genre == 'power':
+            label = np.array([0, 0, 0, 0, 0, 0, 0, 1, 0, 0])
+        elif genre == 'progressive':
+            label = np.array([0, 0, 0, 0, 0, 0, 0, 0, 1, 0])
+        elif genre == 'thrash':
+            label = np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 1])
+        else:
+            return KeyError
+        return label
 
-                except OSError:
-                    print('OSError caused by: ', img, arr)
-
-            return data, label
+    def load_data(self, n_images):
+        n_images = n_images - 1
+        data = np.empty((n_images, 64, 128, 3), dtype='float32')  # number of images, n channels (3 = RGB), w, h
+        label = np.empty((n_images, 10), dtype='uint8')
+        i = 0
+        # categorical_labels = to_categorical(int_labels, num_classes=None)
+        for filename in glob.glob('./preprocessed_imgs_all/*.jpg'):
+            if i == n_images:
+                break
+            try:
+                img = Image.open(filename)
+                arr = np.asarray(img, dtype='float32')
+                genre = filename.rsplit('/', 1)[-1].rsplit('_', 1)[0]
+                # band_nr = filename.rsplit('/', 1)[-1].rsplit('_', 1)[1].rsplit('.', 1)[0]
+                # print(arr.shape)
+                data[i, :, :, :] = arr
+                label[i] = self.get_label(genre)
+                i += 1
+            except OSError:
+                print('OSError caused by: ', img)
+            except KeyError:
+                print('OSError caused by: ', img, genre)
+        return data, label
 
     def train(self, epochs, batch_size=128, sample_interval=50):
 
         # Load the dataset TODO load own data n_images=2827
-        (X_train, y_train), (_, _) = mnist.load_data()
-
-        # TODO check if needed:
-        # int_labels = 0
-        # categorical_labels = to_categorical(int_labels, num_classes=None) #to_categorical translates labels to one-hot-enc vector
-
-        # TensorFlow EXAMPLE:
-        # train_generator = train_datagen.flow_from_directory(
-        #     train_data_dir,
-        #     target_size=(img_width, img_height),
-        #     batch_size=batch_size,
-        #     class_mode='categorical')
+        # mnist.load_data()
+        (X_train, y_train) = self.load_data(43511)
 
         # Configure input
         X_train = (X_train.astype(np.float32) - 127.5) / 127.5
-        X_train = np.expand_dims(X_train, axis=3)  # TODO check what it does
-        y_train = y_train.reshape(-1, 1)  # TODO : horizontal to vertical vector
+        #X_train = np.expand_dims(X_train, axis=3)
+        y_train = y_train.reshape(-1, 1)  # horizontal to vertical vector
 
         # Adversarial ground truths
         valid = np.ones((batch_size, 1))
@@ -237,11 +276,11 @@ class CGAN():
         # gen_imgs = 0.5 * gen_imgs + 0.5
 
         fig, axs = plt.subplots(r, c)
-        cnt = 0
+        cnt = 1
         for i in range(r):
             for j in range(c):
-                axs[i, j].imshow(gen_imgs[cnt, :, :, 0], cmap='gray')  # TODO maybe change cmap to color / RGB?
-                axs[i, j].set_title("Digit: %d" % sampled_labels[cnt])
+                axs[i, j].imshow(gen_imgs[cnt, :, :, 0])
+                axs[i, j].set_title("class: %d" % sampled_labels[cnt])
                 axs[i, j].axis('off')
                 cnt += 1
         fig.savefig("images_cgan_BaLo/%d.png" % epoch)
@@ -249,7 +288,6 @@ class CGAN():
 
 
 if __name__ == '__main__':
-
     BaLo = CGAN()
 
-    #BaLo.train(epochs=51, batch_size=32, sample_interval=50)  # TODO adjust batch size to what fits in memory
+    BaLo.train(epochs=10001, batch_size=16, sample_interval=50)  # TODO adjust batch size to what fits in memory

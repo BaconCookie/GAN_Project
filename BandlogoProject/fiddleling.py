@@ -30,16 +30,20 @@ def get_label(genre):
 
 
 def load_data(n_images):
-    data = np.empty((n_images, 3, 128, 64), dtype='float32')  # number of images, n channels (3 = RGB), w, h
-    label = np.empty((n_images,), dtype='uint8')
+    n_images = n_images - 1
+    data = np.empty((n_images, 64, 128, 3), dtype='float32')  # number of images, n channels (3 = RGB), w, h
+    label = np.empty((n_images, 10), dtype='uint8')
     i = 0
     # categorical_labels = to_categorical(int_labels, num_classes=None)
     for filename in glob.glob('./preprocessed_imgs_all/*.jpg'):
+        if i == n_images:
+            break
         try:
             img = Image.open(filename)
             arr = np.asarray(img, dtype='float32')
             genre = filename.rsplit('/', 1)[-1].rsplit('_', 1)[0]
             # band_nr = filename.rsplit('/', 1)[-1].rsplit('_', 1)[1].rsplit('.', 1)[0]
+            print(arr.shape)
             data[i, :, :, :] = arr
             label[i] = get_label(genre)
             i += 1
@@ -50,7 +54,7 @@ def load_data(n_images):
     return data, label
 
 
-dat = load_data(2827)
+dat = load_data(43511)
 # get_label('black')
 
 print(dat)
