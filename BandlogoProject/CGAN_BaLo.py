@@ -276,7 +276,7 @@ class CGAN():
         # gen_imgs = 0.5 * gen_imgs + 0.5
 
         fig, axs = plt.subplots(r, c)
-        cnt = 1
+        cnt = 0
         for i in range(r):
             for j in range(c):
                 axs[i, j].imshow(gen_imgs[cnt, :, :, 0])
