@@ -159,6 +159,14 @@ def prepoces_imgs():
 # pre = prepoces_imgs()
 
 
+# ----------------------------------------------------------------------
+# Put all band info in a dictionary, save as file
+#
+# d = band_data_to_dict()
+#
+# with open('bandinfo_dict.json', 'w') as f:
+#      f.write(json.dumps(d))
+# ----------------------------------------------------------------------
 
 # ----------------------------------------------------------------------
 # Put all genres in a dictionary, sorted from high to low use frequency

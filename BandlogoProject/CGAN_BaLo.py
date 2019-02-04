@@ -250,6 +250,6 @@ class CGAN():
 
 if __name__ == '__main__':
 
-    cgan = CGAN()
+    BaLo = CGAN()
 
-    #cgan.train(epochs=51, batch_size=32, sample_interval=50)  # TODO adjust batch size to what fits in memory
+    #BaLo.train(epochs=51, batch_size=32, sample_interval=50)  # TODO adjust batch size to what fits in memory
