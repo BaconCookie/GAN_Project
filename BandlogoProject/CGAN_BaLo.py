@@ -254,6 +254,10 @@ class CGAN():
         # # Rescale images_cgan 0 - 1
         # gen_imgs = 0.5 * gen_imgs + 0.5
 
+        # save generator model
+        file_path = "models/generator_BaLo.hdf5"
+        self.generator.save(file_path)
+
         fig, axs = plt.subplots(r, c)
         cnt = 0
         for i in range(r):
@@ -273,4 +277,4 @@ class CGAN():
 if __name__ == '__main__':
     BaLo = CGAN()
 
-    BaLo.train(epochs=10001, batch_size=32, sample_interval=50)
+    BaLo.train(epochs=100000001, batch_size=32, sample_interval=250)

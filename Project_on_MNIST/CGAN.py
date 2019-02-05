@@ -91,7 +91,6 @@ class CGAN():
         img = model(model_input)
         print("build_generator, img", img)
 
-
         return Model([noise, label], img)
 
     def build_discriminator(self):

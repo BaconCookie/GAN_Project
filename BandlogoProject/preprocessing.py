@@ -3,7 +3,6 @@ import glob
 from PIL import Image
 import string
 from collections import Counter
-import seaborn as sns
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -56,7 +55,7 @@ def plot_genres():
     # Plotting
     ax.barh(y_pos, values, align='center', color='blue')
     ax.set_yticks(y_pos)
-    ax.set_yticklabels(bands)
+    #ax.set_yticklabels(bands)
     ax.invert_yaxis()  # labels read top-to-bottom
     ax.set_xticks(x_pos)
     ax.set_xlabel('Frequency of listed genres')
@@ -157,7 +156,7 @@ def prepoces_imgs():
 
 
 # pre = prepoces_imgs()
-
+plot_genres()
 
 # ----------------------------------------------------------------------
 # Put all band info in a dictionary, save as file
