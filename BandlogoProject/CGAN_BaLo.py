@@ -148,7 +148,7 @@ class CGAN():
 
     def load_data(self, n_images):
         n_images = n_images - 1
-        data = np.empty((n_images, 64, 128, 3), dtype='float32')  # number of images, n channels (3 = RGB), w, h
+        data = np.empty((n_images, 64, 128, 3), dtype='float32')  # number of images, w, h, n channels (3 = RGB)
         label = np.empty((n_images, 10), dtype='uint8')
         i = 0
         for filename in glob.glob('./preprocessed_imgs_all/*.jpg'):
@@ -157,11 +157,11 @@ class CGAN():
             try:
                 img = Image.open(filename)
                 arr = np.asarray(img, dtype='float32')
-                genre = filename.rsplit('/', 1)[-1].rsplit('_', 1)[0]
-                # band_nr = filename.rsplit('/', 1)[-1].rsplit('_', 1)[1].rsplit('.', 1)[0]
+                genre = filename.rsplit('/', 1)[-1].rsplit('_', 1)[0]  # Extract genre from filename
+                # band_nr = filename.rsplit('/', 1)[-1].rsplit('_', 1)[1].rsplit('.', 1)[0]  # gets original band id
                 # print(arr.shape)
-                data[i, :, :, :] = arr
-                label[i] = self.get_label(genre)
+                data[i, :, :, :] = arr  # Assign each 3D array to data
+                label[i] = self.get_label(genre)  # Get label for this genre
                 i += 1
             except OSError:
                 print('OSError caused by: ', img)
@@ -248,4 +248,4 @@ class CGAN():
 if __name__ == '__main__':
     BaLo = CGAN()
 
-    BaLo.train(epochs=1, batch_size=32, sample_interval=50)  # TODO adjust batch size to what fits in memory
+    BaLo.train(epochs=10001, batch_size=32, sample_interval=50)  # TODO adjust batch size to what fits in memory
