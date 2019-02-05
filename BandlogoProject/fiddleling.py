@@ -1,7 +1,7 @@
 import glob
 from PIL import Image
 import numpy as np
-
+from mlxtend.preprocessing import shuffle_arrays_unison
 
 def get_label(genre):
     if genre == 'black':
