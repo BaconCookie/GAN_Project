@@ -62,10 +62,6 @@ class CGAN():
         model.add(LeakyReLU(alpha=0.2))
         model.add(BatchNormalization(momentum=0.8))
 
-        model.add(Dense(512))
-        model.add(LeakyReLU(alpha=0.2))
-        model.add(BatchNormalization(momentum=0.8))
-
         model.add(Dense(1024))
         model.add(LeakyReLU(alpha=0.2))
         model.add(BatchNormalization(momentum=0.8))
@@ -120,6 +116,31 @@ class CGAN():
         # print("validity", validity)
         # print("Model([img, label], validity)", Model([img, label], validity))
         return Model([img, label], validity)
+
+    def get_genre(self, cnt):
+        if cnt == 0:
+            genre = 'black'
+        elif cnt == 1:
+            genre = 'core'
+        elif cnt == 2:
+            genre = 'death'
+        elif cnt == 3:
+            genre = 'doom'
+        elif cnt == 4:
+            genre = 'gothic'
+        elif cnt == 5:
+            genre = 'heavy'
+        elif cnt == 6:
+            genre = 'pagan'
+        elif cnt == 7:
+            genre = 'power'
+        elif cnt == 8:
+            genre = 'progressive'
+        elif cnt == 9:
+            genre = 'thrash'
+        else:
+            return KeyError
+        return genre
 
     def get_label(self, genre):
         if genre == 'black':
@@ -238,14 +259,18 @@ class CGAN():
         for i in range(r):
             for j in range(c):
                 axs[i, j].imshow(gen_imgs[cnt, :, :, 0])
-                axs[i, j].set_title("class: %d" % sampled_labels[cnt])
+                try:
+                    genre = self.get_genre(cnt)
+                except KeyError:
+                    print('KeyError in: ', cnt)
+                axs[i, j].set_title(genre)
                 axs[i, j].axis('off')
                 cnt += 1
-        fig.savefig("images_cgan_BaLo/%d.png" % epoch)
+        fig.savefig("images_cgan_BaLo/BaLo_%d.png" % epoch)
         plt.close()
 
 
 if __name__ == '__main__':
     BaLo = CGAN()
 
-    BaLo.train(epochs=10001, batch_size=32, sample_interval=50)  # TODO adjust batch size to what fits in memory
+    BaLo.train(epochs=10001, batch_size=32, sample_interval=50)
