@@ -10,6 +10,18 @@ from keras.models import Sequential, Model
 from keras.optimizers import Adam
 
 
+#########################################################################################
+#                                                                                       #
+# Adjustment of:                                                                        #
+#                                                                                       #
+# Implementation of Conditional Generative Adversarial Nets.                            #
+#                                                                                       #
+# Code from: https://github.com/eriklindernoren/Keras-GAN/blob/master/cgan/cgan.py      #
+#                                                                                       #
+# Is implementation of paper: https://arxiv.org/abs/1411.1784                           #
+#                                                                                       #
+#########################################################################################
+
 class CGAN():
     def __init__(self):
         # Input shape
@@ -87,8 +99,6 @@ class CGAN():
     def build_discriminator(self):
 
         model = Sequential()
-        # print("self.img_shape", self.img_shape)
-        # print("np.prod(self.img_shape)", np.prod(self.img_shape))
 
         model.add(Dense(512, input_dim=np.prod(self.img_shape)))
         model.add(LeakyReLU(alpha=0.2))
@@ -106,15 +116,12 @@ class CGAN():
 
         img = Input(shape=self.img_shape)
         label = Input(shape=(1,), dtype='int32')
-
         label_embedding = Flatten()(Embedding(self.num_classes, np.prod(self.img_shape))(label))
         flat_img = Flatten()(img)
 
         model_input = multiply([flat_img, label_embedding])
-        # print("model_input", model_input)
         validity = model(model_input)
-        # print("validity", validity)
-        # print("Model([img, label], validity)", Model([img, label], validity))
+
         return Model([img, label], validity)
 
     def get_genre(self, cnt):
@@ -194,8 +201,6 @@ class CGAN():
 
         # Load the dataset
         (X_train, y_train) = self.load_data(43511)
-        # print(X_train.shape)
-        # print(y_train.shape)
 
         # Configure input
         X_train = (X_train.astype(np.float32) - 127.5) / 127.5
@@ -251,10 +256,7 @@ class CGAN():
 
         gen_imgs = self.generator.predict([noise, sampled_labels])
 
-        # # Rescale images_cgan 0 - 1
-        # gen_imgs = 0.5 * gen_imgs + 0.5
-
-        # save generator model
+        # Save generator model
         file_path = "models/generator_BaLo.hdf5"
         self.generator.save(file_path)
 
